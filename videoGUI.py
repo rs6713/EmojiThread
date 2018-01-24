@@ -94,15 +94,47 @@ imageFrame.config(background="#880022")
 imageFrame.pack()
 #w.pack()
 
+emotionsAvail=["neutral","happiness", "sadness", "surprise" , "contempt","disgust", "anger", "fear"]
+#"happiness", "sadness", "surprise", , "contempt","disgust", "anger", "fear"
+def loadEmotions():
+    result={}
+    for e in emotionsAvail:
+        temp= e+".gif"
+        temp=Image.open(temp)
+        #temp=temp.resize((300,300))#, Image.ANTIALIAS
+
+        #temp=cv2.imread(temp)
+        #temp=Image.open(temp).resize((300,300))    
+        #faceEmotion = Image.fromarray(temp)
+
+        currentEmotion= ImageTk.PhotoImage(image=temp.resize((300,300),Image.ANTIALIAS ) )
+        result[e]=currentEmotion
+
+        #temp = ImageTk.PhotoImage(file=temp)
+        #result[e]=temp
+
+        #result[e]= PhotoImage(file=temp)
+
+        #result[e] = PhotoImage(Image.open(temp) )
+        #result[e]=cv2.imread( e+".png")    
+    return result
+
+#Load emotion images
+
+emotionPics= loadEmotions()
+print(emotionPics)
+
 
 cap = cv2.VideoCapture(0)
 
 def drawFace(imageFrame, emotion, top, left):
 
-    
     imageFrame.create_image(left, top, anchor=NW, image=emotion)#50,50, anchor="nw", top,left 
 
-def show_frame(ct, faceRect, faceEmotion):
+def show_frame(ct, faceRect, currentEmotion):
+    
+    global emotionPics
+
     ct+=1
     _, frame = cap.read()
 
@@ -121,16 +153,29 @@ def show_frame(ct, faceRect, faceEmotion):
         if rect!=0:
             faceRect=rect
         if emotion!="":
-            faceEmotion=emotion
-            temp=cv2.imread( emotion+".png")    
-            faceEmotion = Image.fromarray(temp)
-            faceEmotion = ImageTk.PhotoImage(image=faceEmotion.resize((faceRect['width'],faceRect['height']), Image.ANTIALIAS))#.resize((1200,1000), Image.ANTIALIAS).resize((1200,1000), Image.ANTIALIAS)
+            #faceEmotion=emotion
+            currentEmotion=emotionPics[emotion]
 
+            #temp=cv2.imread( emotion+".png")    
+            #faceEmotion = Image.fromarray(temp)
+            # currentEmotion= ImageTk.PhotoImage(image=faceEmotion)
+            
+            
+            #currentEmotion = ImageTk.PhotoImage(file=emotion+".png")
+            
+            #faceEmotion = Image.fromarray(temp)
+            #faceEmotion = ImageTk.PhotoImage(image=faceEmotion.resize((faceRect['width'],faceRect['height']), Image.ANTIALIAS))#.resize((1200,1000), Image.ANTIALIAS).resize((1200,1000), Image.ANTIALIAS)
+            #print("Resizing image from", temp.width(), temp.height(), " to: ", faceRect['width'], faceRect['height'])
+
+            #faceEmotion=temp
+            #faceEmotion=temp.zoom(faceRect['width']/ temp.width() ,faceRect['height']/temp.height() )
+            #faceEmotion=temp.resize((faceRect['width'],faceRect['height']), Image.ANTIALIAS)
+            
             #temp=Image.open(emotion+".png").convert('RGBA') 
             #faceEmotion = Image.fromarray(temp)
             #faceEmotion = ImageTk.PhotoImage(image=temp.resize((faceRect['width'],faceRect['height']), Image.ANTIALIAS))#.resize((1200,1000), Image.ANTIALIAS).resize((1200,1000), Image.ANTIALIAS)
                 
-    if(ct==20):
+    if(ct==40):
         ct=0
 
     imageFrame.delete("all")
@@ -139,15 +184,19 @@ def show_frame(ct, faceRect, faceEmotion):
     imageFrame.imgtk = imgtk
     if faceRect!=0:
         imageFrame.create_rectangle(faceRect['left'], faceRect['top'], faceRect['left']+faceRect['width'], faceRect['top']+faceRect['height'],outline="blue")
-    if faceEmotion!="":
-        drawFace(imageFrame,faceEmotion, faceRect['top'], faceRect['left'])
+    if currentEmotion!="":
+        print("Create emoticon image",faceRect['left'], faceRect['top'], currentEmotion, currentEmotion.height() )
+        imageFrame.create_image(faceRect['left'], faceRect['top'], anchor=NW, image=currentEmotion)#faceRect['left'], faceRect['top']
+        imageFrame.currentEmotion=currentEmotion
+        imageFrame.image=currentEmotion
+        #drawFace(imageFrame,faceEmotion, faceRect['top'], faceRect['left'])
     
     #imageFrame.configure(image=imgtk)
     #imageFrame.create_image(50,50, anchor="nw", image=img)
     #imageFrame.create_image(50,50, anchor="nw", image=cv2image)
     #imageFrame.pack()
 
-    imageFrame.after(50, show_frame, ct, faceRect, faceEmotion) 
+    imageFrame.after(50, show_frame, ct, faceRect, currentEmotion) 
 
     #lmain.imgtk = imgtk
     #lmain.configure(image=imgtk)
