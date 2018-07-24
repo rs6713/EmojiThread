@@ -99,7 +99,7 @@ class App:
         # widgets packed relative to their parent (btns -> frame -> master)
 
     def say_hi(self):
-        print "hi there, everyone!"
+        print ("hi there, everyone!")
 
 root = Tk()
 root.wm_title("Video Streaming Application")
